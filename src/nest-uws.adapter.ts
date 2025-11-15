@@ -12,7 +12,7 @@ type NestWsMessageHandler = {
   callback: (data: unknown) => unknown;
 };
 
-interface UwsClientWithMetadata extends UWS.WebSocket<any> {
+interface UwsClientWithMetadata extends UwsClient {
   [HANDLERS]?: NestWsMessageHandler[];
   [TRANSFORM]?: (data: any) => Observable<any>;
   [DISCONNECT]?: (client: UwsClient) => void;
