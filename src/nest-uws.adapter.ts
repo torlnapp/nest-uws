@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Logger, WebSocketAdapter, WsMessageHandler } from '@nestjs/common';
-import { Observable, from, isObservable } from 'rxjs';
 import * as UWS from 'uWebSockets.js';
+import { decode } from '@msgpack/msgpack';
+import { Logger, WebSocketAdapter } from '@nestjs/common';
+import { from, isObservable, Observable } from 'rxjs';
 
 type UwsServer = UWS.TemplatedApp;
-type UwsClient = UWS.WebSocket<any>;
+type UwsClient = UWS.WebSocket<unknown>;
 type UwsAppOptions = UWS.AppOptions;
 
 type NestWsMessageHandler = {
@@ -12,10 +12,15 @@ type NestWsMessageHandler = {
   callback: (data: unknown) => unknown;
 };
 
+type WebSocketPacket = {
+  event: string;
+  data: unknown;
+};
+
 interface UwsClientWithMetadata extends UwsClient {
-  [HANDLERS]?: NestWsMessageHandler[];
-  [TRANSFORM]?: (data: any) => Observable<any>;
-  [DISCONNECT]?: (client: UwsClient) => void;
+  [HANDLERS]: NestWsMessageHandler[];
+  [TRANSFORM]: (data: unknown) => Observable<unknown>;
+  [DISCONNECT]: (client: UwsClient) => void;
 }
 
 const HANDLERS = Symbol('nestWsHandlers');
@@ -52,7 +57,6 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
         : UWS.App(base);
 
     app.listen(port, (listenSocket) => {
-      console.log('listenSocket', listenSocket);
       if (listenSocket === false) {
         this.logger.error(`Failed to listen on port ${port}`);
         return;
@@ -78,22 +82,19 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
         callback(ws);
       },
 
-      message: (ws: UwsClient, arrayBuffer: ArrayBuffer, isBinary: boolean) => {
+      message: (ws: UwsClientWithMetadata, arrayBuffer: ArrayBuffer) => {
         this.logger.log('uWS message() called');
 
-        const wsWithMetadata = ws as UwsClientWithMetadata;
-        const handlers = wsWithMetadata[HANDLERS];
-        const transform = wsWithMetadata[TRANSFORM];
+        const handlers = ws[HANDLERS];
+        const transform = ws[TRANSFORM];
 
         if (!handlers || !transform) {
           return;
         }
 
-        const raw = Buffer.from(arrayBuffer).toString('utf8');
-
-        let packet: { event: string; data: unknown };
+        let packet: WebSocketPacket;
         try {
-          packet = JSON.parse(raw) as { event: string; data: unknown };
+          packet = decode(arrayBuffer) as WebSocketPacket;
         } catch {
           return;
         }
@@ -141,10 +142,9 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
           },
         });
       },
-      close: (ws: UwsClient, code: number, message: ArrayBuffer) => {
+      close: (ws: UwsClient, code: number) => {
         this.logger.log(`uWS close() called, code: ${code}`);
-        const wsWithMetadata = ws as UwsClientWithMetadata;
-        const disconnect = wsWithMetadata[DISCONNECT];
+        const disconnect = ws[DISCONNECT];
         if (disconnect) {
           disconnect(ws);
         }
@@ -163,13 +163,13 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
   bindMessageHandlers(
     client: UwsClient,
     handlers: NestWsMessageHandler[],
-    transform: (data: any) => Observable<any>,
+    transform: (data: unknown) => Observable<unknown>,
   ) {
     const wsWithMetadata = client as UwsClientWithMetadata;
     wsWithMetadata[HANDLERS] = handlers;
     wsWithMetadata[TRANSFORM] = transform;
   }
-  close(server: UwsServer) {
+  close() {
     if (this.listenSocket) {
       UWS.us_listen_socket_close(this.listenSocket);
       this.listenSocket = undefined;
