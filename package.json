@@ -5,6 +5,9 @@
     "adaptor/",
     "examples/*"
   ],
+  "scripts": {
+    "format": "biome format --fix"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.3.5"
   }
