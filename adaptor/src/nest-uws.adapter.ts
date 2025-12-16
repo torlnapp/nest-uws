@@ -2,30 +2,18 @@ import * as UWS from 'uWebSockets.js';
 import { decode } from '@msgpack/msgpack';
 import { Logger, WebSocketAdapter } from '@nestjs/common';
 import { from, isObservable, Observable } from 'rxjs';
+import {
+  NestWsMessageHandler,
+  UwsAppOptions,
+  UwsClient,
+  UwsClientWithMetadata,
+  UwsServer,
+  WebSocketPacket,
+} from './types';
 
-type UwsServer = UWS.TemplatedApp;
-type UwsClient = UWS.WebSocket<unknown>;
-type UwsAppOptions = UWS.AppOptions;
-
-type NestWsMessageHandler = {
-  message: string;
-  callback: (data: unknown) => unknown;
-};
-
-type WebSocketPacket = {
-  event: string;
-  data: unknown;
-};
-
-interface UwsClientWithMetadata extends UwsClient {
-  [HANDLERS]: NestWsMessageHandler[];
-  [TRANSFORM]: (data: unknown) => Observable<unknown>;
-  [DISCONNECT]: (client: UwsClient) => void;
-}
-
-const HANDLERS = Symbol('nestWsHandlers');
-const TRANSFORM = Symbol('nestWsTransform');
-const DISCONNECT = Symbol('nestWsDisconnect');
+export const HANDLERS = Symbol('nestWsHandlers');
+export const TRANSFORM = Symbol('nestWsTransform');
+export const DISCONNECT = Symbol('nestWsDisconnect');
 
 export interface NestUwsAdapterOptions {
   path?: string;
