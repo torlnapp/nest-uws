@@ -12,6 +12,7 @@
       "name": "@torlnapp/nest-uws-adapter",
       "version": "1.1.0",
       "dependencies": {
+        "@torlnapp/crypto-utils": "^1.0.1",
         "uWebSockets.js": "^20.56.0",
       },
       "devDependencies": {
@@ -160,6 +161,8 @@
 
     "@tokenizer/token": ["@tokenizer/token@0.3.0", "https://private-registry.torln.com/@tokenizer/token/-/token-0.3.0.tgz", {}, "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A=="],
 
+    "@torlnapp/crypto-utils": ["@torlnapp/crypto-utils@1.0.1", "https://private-registry.torln.com/@torlnapp/crypto-utils/-/crypto-utils-1.0.1.tgz", { "peerDependencies": { "@msgpack/msgpack": "^3", "canonicalize": "^2", "typescript": "^5" } }, "sha512-oCckCgTHhZEvRZot2TMcUeJrrwRsyquWn9aQfj734Tv40JpU2/AZMxpWMIYOlcRyNGLELpZfK6b3gSAk6mu56g=="],
+
     "@torlnapp/nest-uws-adapter": ["@torlnapp/nest-uws-adapter@workspace:adaptor"],
 
     "@tsconfig/node10": ["@tsconfig/node10@1.0.12", "https://private-registry.torln.com/@tsconfig/node10/-/node10-1.0.12.tgz", {}, "sha512-UCYBaeFvM11aU2y3YPZ//O5Rhj+xKyzy7mvcIoAjASbigy8mHMryP5cK7dgjlz2hWxh1g5pLw084E0a/wlUSFQ=="],
@@ -209,6 +212,8 @@
     "call-bind-apply-helpers": ["call-bind-apply-helpers@1.0.2", "https://private-registry.torln.com/call-bind-apply-helpers/-/call-bind-apply-helpers-1.0.2.tgz", { "dependencies": { "es-errors": "^1.3.0", "function-bind": "^1.1.2" } }, "sha512-Sp1ablJ0ivDkSzjcaJdxEunN5/XvksFJ2sMBFfq6x0ryhQV/2b/KwFe21cMpmHtPOSij8K99/wSfoEuTObmuMQ=="],
 
     "call-bound": ["call-bound@1.0.4", "https://private-registry.torln.com/call-bound/-/call-bound-1.0.4.tgz", { "dependencies": { "call-bind-apply-helpers": "^1.0.2", "get-intrinsic": "^1.3.0" } }, "sha512-+ys997U96po4Kx/ABpBCqhA9EuxJaQWDQg7295H4hBphv3IZg0boBKuwYpt4YXp6MZ5AmZQnU/tyMTlRpaSejg=="],
+
+    "canonicalize": ["canonicalize@2.1.0", "https://private-registry.torln.com/canonicalize/-/canonicalize-2.1.0.tgz", { "bin": { "canonicalize": "bin/canonicalize.js" } }, "sha512-F705O3xrsUtgt98j7leetNhTWPe+5S72rlL5O4jA1pKqBVQ/dT1O1D6PFxmSXvc0SUOinWS57DKx0I3CHrXJHQ=="],
 
     "chokidar": ["chokidar@5.0.0", "https://private-registry.torln.com/chokidar/-/chokidar-5.0.0.tgz", { "dependencies": { "readdirp": "^5.0.0" } }, "sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw=="],
 

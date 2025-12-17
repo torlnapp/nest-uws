@@ -1,4 +1,4 @@
-import { encode, decode } from '@msgpack/msgpack';
+import { decode, encode } from '@msgpack/msgpack';
 import WebSocket, { RawData } from 'ws';
 
 const WS_URL = process.env.WS_URL ?? 'ws://localhost:3001/ws';

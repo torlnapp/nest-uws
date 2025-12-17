@@ -19,6 +19,7 @@
     "rxjs": "^7.8.2"
   },
   "dependencies": {
+    "@torlnapp/crypto-utils": "^1.0.1",
     "uWebSockets.js": "^20.56.0"
   },
   "main": "./dist/index.mjs",

@@ -1,6 +1,6 @@
 import * as UWS from 'uWebSockets.js';
-import { decode } from '@msgpack/msgpack';
 import { Logger, WebSocketAdapter } from '@nestjs/common';
+import { decodeMsgPack, encodeMsgPack, toBinary } from '@torlnapp/crypto-utils';
 import { from, isObservable, Observable } from 'rxjs';
 import {
   NestWsMessageHandler,
@@ -11,9 +11,9 @@ import {
   WebSocketPacket,
 } from './types';
 
-export const HANDLERS = Symbol('nestWsHandlers');
-export const TRANSFORM = Symbol('nestWsTransform');
-export const DISCONNECT = Symbol('nestWsDisconnect');
+export const HANDLERS = Symbol('NEST_WS_HANDLERS');
+export const TRANSFORM = Symbol('NEST_WS_TRANSFORM');
+export const DISCONNECT = Symbol('NEST_WS_DISCONNECT');
 
 export interface NestUwsAdapterOptions {
   path?: string;
@@ -66,13 +66,10 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
       idleTimeout: opts.idleTimeout ?? 60,
 
       open: (ws: UwsClient) => {
-        this.logger.log('uWS open() called');
         callback(ws);
       },
 
       message: (ws: UwsClientWithMetadata, arrayBuffer: ArrayBuffer) => {
-        this.logger.log('uWS message() called');
-
         const handlers = ws[HANDLERS];
         const transform = ws[TRANSFORM];
 
@@ -82,7 +79,7 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
 
         let packet: WebSocketPacket;
         try {
-          packet = decode(arrayBuffer) as WebSocketPacket;
+          packet = decodeMsgPack(toBinary(arrayBuffer)) as WebSocketPacket;
         } catch {
           return;
         }
@@ -110,28 +107,27 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
             if (response === undefined) return;
 
             ws.send(
-              JSON.stringify({
+              encodeMsgPack({
                 event,
                 data: response,
               }),
-              false,
+              true,
             );
           },
           error: (err: unknown) => {
             const errorMessage =
               err instanceof Error ? err.message : 'Internal error';
             ws.send(
-              JSON.stringify({
+              encodeMsgPack({
                 event: 'error',
                 data: errorMessage,
               }),
-              false,
+              true,
             );
           },
         });
       },
-      close: (ws: UwsClient, code: number) => {
-        this.logger.log(`uWS close() called, code: ${code}`);
+      close: (ws: UwsClient) => {
         const disconnect = ws[DISCONNECT];
         if (disconnect) {
           disconnect(ws);
@@ -141,6 +137,7 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
 
     return server;
   }
+
   bindClientDisconnect(
     client: UwsClient,
     callback: (client: UwsClient) => void,
@@ -148,6 +145,7 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
     const wsWithMetadata = client as UwsClientWithMetadata;
     wsWithMetadata[DISCONNECT] = callback;
   }
+
   bindMessageHandlers(
     client: UwsClient,
     handlers: NestWsMessageHandler[],
@@ -157,11 +155,11 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
     wsWithMetadata[HANDLERS] = handlers;
     wsWithMetadata[TRANSFORM] = transform;
   }
+
   close() {
     if (this.listenSocket) {
       UWS.us_listen_socket_close(this.listenSocket);
       this.listenSocket = undefined;
-      this.logger.log('uWS listen socket closed');
     }
   }
 }
