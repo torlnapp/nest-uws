@@ -106,13 +106,7 @@ export class NestUwsAdapter implements WebSocketAdapter<UwsServer, UwsClient> {
           next: (response) => {
             if (response === undefined) return;
 
-            ws.send(
-              encodeMsgPack({
-                event,
-                data: response,
-              }),
-              true,
-            );
+            ws.send(encodeMsgPack(response), true);
           },
           error: (err: unknown) => {
             const errorMessage =
